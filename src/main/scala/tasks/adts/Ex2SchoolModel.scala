@@ -32,48 +32,44 @@ object SchoolModel:
 
   object Ex2SchoolModel extends SchoolModule:
 
-    extension (school: School) override def courseByName(name: String): Optional[Course] = ???
+    extension (school: School) override def nameOfCourse(teacher: Course): String = ???
 
-    extension (school: School) override def nameOfCourse(teacher: Teacher): String = ???
+    //case class Course(name: String)
+    //case class Teacher(name: String, courses: Sequence[Course])
+    //case class School(teachers: Sequence[Teacher], courses: Sequence[Course])
 
-    extension (school: School) override def coursesOfATeacher(teacher: Teacher): Sequence[Course] = ???
+    opaque type Course = String
+    opaque type Teacher = (String, Sequence[Course])
+    opaque type School = (Sequence[Teacher], Sequence[Course])
 
-    //extension (school: School) override def addCourse(name: String): School = ???
-
-    //extension (school: School) override def setTeacherToCourse(teacher: Teacher, course: Course): School = ???
-
-    //extension (school: School) override def teacherByName(name: String): Optional[Teacher] = ???
-
-    //extension (school: School) override def nameOfTeacher(teacher: Teacher): String = ???
-
-    case class Course(name: String)
-    case class Teacher(name: String, courses: Sequence[Course])
-    case class School(teachers: Sequence[Teacher], courses: Sequence[Course])
-
-    //opaque type Course = String
-
-    /*def Course(name: String): Course
-    def Teacher(name: String): Teacher
-    def School(): School*/
+    def course(name: String): Course = name
+    def teacher(name: String, courses: Sequence[Course]): Teacher = (name, courses)
+    def school(teachers: Sequence[Teacher], courses: Sequence[Course]): School = (teachers, courses)
 
     extension(school: School)
-      def addCourse(name: String): School = School(school.teachers, Sequence.Cons(Course(name), school.courses))
-      def addTeacher(name: String): School = School(Sequence.Cons(Teacher(name, Sequence.Nil()), school.teachers), school.courses)
-      def nameOfTeacher(teacher: Teacher): String = teacher.name
-      //def nameOfCourse()
-      def teacherByName(name: String): Optional[Teacher] = school.teachers match
+      def addCourse(name: String): School = this.school(school._1, Sequence.Cons(this.course(name), school._2))
+      def addTeacher(name: String): School = this.school(Sequence.Cons(this.teacher(name, Sequence.Nil()), school._1), school._2)
+      def nameOfTeacher(teacher: Teacher): String = teacher._1
+      def teacherByName(name: String): Optional[Teacher] = school._1 match
         case Sequence.Nil() => Optional.Empty()
-        case Sequence.Cons(t, c) if name == t.name => Optional.Just(t)
-        case Sequence.Cons(t, c) => School(c, school.courses).teacherByName(name)
-
-      def setTeacherToCourse(teacher: Teacher, course: Course): School = school.teachers match
+        case Sequence.Cons(t, c) if name == t._1 => Optional.Just(t)
+        case Sequence.Cons(t, c) => this.school(c, school._2).teacherByName(name)
+      def courseByName(name: String): Optional[Course] = school._2 match
+        case Sequence.Nil() => Optional.Empty()
+        case Sequence.Cons(c, n) if c == name => Optional.Just(c)
+        case Sequence.Cons(c, n) => this.school(school._1, n).courseByName(name)
+      def setTeacherToCourse(teacher: Teacher, course: Course): School = school._1 match
         case Sequence.Nil() => school
-        case Sequence.Cons(t, c) => School(Sequence.Cons(addCourseToTeacher(teacher, course), Sequence.filter(school.teachers)(_.name != teacher.name)), school.courses)
-        //case  
+        case _ => this.school(Sequence.Cons(addCourseToTeacher(teacher, course), Sequence.filter(school._1)(_._1 != teacher._1)), school._2)
 
-      private def addCourseToTeacher(teacher: Teacher, course: Course): Teacher = Teacher(teacher.name, Sequence.Cons(course, teacher.courses))
-      
-      
+      private def addCourseToTeacher(teacher: Teacher, course: Course): Teacher = this.teacher(teacher._1, Sequence.Cons(course, teacher._2))
+      def coursesOfATeacher(teacher: Teacher): Sequence[Course] = school._1 match
+        case Sequence.Nil() => Sequence.Nil()
+        case Sequence.Cons(t, c) if teacher._1 == t._1 => t._2
+        case Sequence.Cons(t, c) => this.school(c, school._2).coursesOfATeacher(teacher)
 
-      
-      
+
+      //def nameOfCourse()
+
+
+
