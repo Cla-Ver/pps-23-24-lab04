@@ -32,7 +32,7 @@ object SchoolModel:
 
   object Ex2SchoolModel extends SchoolModule:
 
-    extension (school: School) override def nameOfCourse(teacher: Course): String = ???
+    //extension (school: School) override def nameOfCourse(teacher: Course): String = ???
 
     //case class Course(name: String)
     //case class Teacher(name: String, courses: Sequence[Course])
@@ -50,6 +50,7 @@ object SchoolModel:
       def addCourse(name: String): School = this.school(school._1, Sequence.Cons(this.course(name), school._2))
       def addTeacher(name: String): School = this.school(Sequence.Cons(this.teacher(name, Sequence.Nil()), school._1), school._2)
       def nameOfTeacher(teacher: Teacher): String = teacher._1
+      def nameOfCourse(course: Course): String = course
       def teacherByName(name: String): Optional[Teacher] = school._1 match
         case Sequence.Nil() => Optional.Empty()
         case Sequence.Cons(t, c) if name == t._1 => Optional.Just(t)
