@@ -17,6 +17,7 @@ class ComplexTest:
   // From now, everything is independent of specific implementation of Complex
 
   @Test def testReal() =
+    val l:Complex = complex(10, 20)
     assertEquals(10, complex(10, 20).re(), 0)
 
   @Test def testImaginary() =
